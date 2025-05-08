@@ -17,22 +17,22 @@ namespace m5avatar {
 
 class Face {
  private:
-  Drawable *mouth;
-  Drawable *eyeR;
-  Drawable *eyeL;
-  Drawable *eyeblowR;
-  Drawable *eyeblowL;
-  BoundingRect *mouthPos;
-  BoundingRect *eyeRPos;
-  BoundingRect *eyeLPos;
-  BoundingRect *eyeblowRPos;
-  BoundingRect *eyeblowLPos;
-  BoundingRect *boundingRect;
-  M5Canvas *sprite;
-  M5Canvas *tmpSprite;
-  Balloon *b;
-  Effect *h;
-  BatteryIcon *battery;
+  Drawable *mouth_;
+  Drawable *eyeR_;
+  Drawable *eyeL_;
+  Drawable *eyeblowR_;
+  Drawable *eyeblowL_;
+  BoundingRect *mouthPos_;
+  BoundingRect *eyeRPos_;
+  BoundingRect *eyeLPos_;
+  BoundingRect *eyeblowRPos_;
+  BoundingRect *eyeblowLPos_;
+  BoundingRect *boundingRect_;
+  M5Canvas *sprite_;
+  M5Canvas *tmpSprite_;
+  Balloon *b_;
+  Effect *h_;
+  BatteryIcon *battery_;
 
  public:
   // constructor
@@ -61,6 +61,7 @@ class Face {
 
   Drawable *getMouth();
   BoundingRect *getBoundingRect();
+  void setBoundingRect(BoundingRect *rect);
 
   void setLeftEye(Drawable *eye);
   void setRightEye(Drawable *eye);

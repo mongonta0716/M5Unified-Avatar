@@ -95,13 +95,42 @@ TaskResult_t facialLoop(void *args) {
   TaskResult();
 }
 
-Avatar::Avatar() : Avatar(&M5.Display) {}
+Avatar::Avatar(int width, int height) : Avatar(&M5.Display, width, height) {}
 
-Avatar::Avatar(M5GFX* display) : Avatar(new Face(new Mouth(50, 90, 4, 60), new Eye(8, false), new Eye(8, true), new Eyeblow(32, 0, false), new Eyeblow(32, 0, true), display), display) {}
+Avatar::Avatar(M5GFX* display, int width, int height) {
+    // Use display dimensions if width/height are not specified (0)
+    int w = (width == 0) ? DISPLAY_WIDTH : width;
+    int h = (height == 0) ? DISPLAY_HEIGHT : height;
+    
+    // Calculate scaling factors
+    float scaleX = w / 320.0f;
+    float scaleY = h / 240.0f;
+    
+    // Scale mouth dimensions relative to screen size
+    uint16_t mouthMinWidth = static_cast<uint16_t>(50 * scaleX);
+    uint16_t mouthMaxWidth = static_cast<uint16_t>(90 * scaleX);
+    uint16_t mouthMinHeight = static_cast<uint16_t>(4 * scaleY);
+    uint16_t mouthMaxHeight = static_cast<uint16_t>(60 * scaleY);
+    
+    // Scale eye radius relative to screen size
+    uint16_t eyeRadius = static_cast<uint16_t>(8 * scaleX);
+    
+    // Scale eyeblow dimensions relative to screen size
+    uint16_t eyeblowWidth = static_cast<uint16_t>(32 * scaleX);
+    uint16_t eyeblowHeight = static_cast<uint16_t>(4 * scaleY);
+    
+    // Create face with custom BoundingRect
+    *this = Avatar(new Face(new Mouth(mouthMinWidth, mouthMaxWidth, mouthMinHeight, mouthMaxHeight), 
+                           new Eye(eyeRadius, false), new Eye(eyeRadius, true),
+                           new Eyeblow(eyeblowWidth, eyeblowHeight, false), 
+                           new Eyeblow(eyeblowWidth, eyeblowHeight, true), 
+                           display), 
+                  display, w, h);
+}
 
-Avatar::Avatar(Face *face) : Avatar(face, &M5.Display) {}
+Avatar::Avatar(Face *face, int width, int height) : Avatar(face, &M5.Display, width, height) {}
 
-Avatar::Avatar(Face *face, M5GFX* display)
+Avatar::Avatar(Face *face, M5GFX* display, int width, int height)
     : face{face},
       _isDrawing{false},
       expression{Expression::Neutral},
@@ -121,7 +150,24 @@ Avatar::Avatar(Face *face, M5GFX* display)
       colorDepth{1},
       batteryIconStatus{BatteryIconStatus::invisible},
       batteryLevel{0},
-      speechFont{nullptr} {}
+      speechFont{nullptr} 
+{
+    // If custom dimensions are provided, update the BoundingRect
+    if (width > 0 && height > 0) {
+        // Get the current boundingRect and update it with new dimensions
+        BoundingRect* boundingRect = face->getBoundingRect();
+        if (boundingRect) {
+            // Create a new BoundingRect with the specified dimensions
+            BoundingRect* newRect = new BoundingRect(boundingRect->getTop(), 
+                                                   boundingRect->getLeft(), 
+                                                   width, height);
+            // Delete old BoundingRect to avoid memory leak
+            delete boundingRect;
+            // Update the Face with the new BoundingRect
+            face->setBoundingRect(newRect);
+        }
+    }
+}
 
 Avatar::~Avatar() { delete face; }
 
@@ -186,7 +232,7 @@ void Avatar::start(int colorDepth) {
   // TODO(meganetaaan): keep handle of these tasks
   xTaskCreateUniversal(drawLoop,        /* Function to implement the task */
                        "drawLoop",      /* Name of the task */
-                       2048,            /* Stack size in words */
+                       8192,            /* Stack size in words */
                        ctx,             /* Task input parameter */
                        1,               /* Priority of the task */
                        &drawTaskHandle, /* Task handle. */
@@ -194,7 +240,7 @@ void Avatar::start(int colorDepth) {
 
   xTaskCreateUniversal(facialLoop,   /* Function to implement the task */
                        "facialLoop", /* Name of the task */
-                       1024,         /* Stack size in words */
+                       8192,         /* Stack size in words */
                        ctx,          /* Task input parameter */
                        2,            /* Priority of the task */
                        NULL,         /* Task handle. */
@@ -234,6 +280,8 @@ void Avatar::setRotation(float radian) { this->rotation = radian; }
 void Avatar::setScale(float scale) { this->scale = scale; }
 
 void Avatar::setPosition(int top, int left) {
+  // Use LCD's top-left corner (0,0) as the reference point
+  // The BoundingRect's position is now directly set using the provided coordinates
   this->getFace()->getBoundingRect()->setPosition(top, left);
 }
 
