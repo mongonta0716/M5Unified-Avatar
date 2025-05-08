@@ -4,6 +4,14 @@
 
 #include "Avatar.h"
 
+// Define display size if not already defined
+#ifndef DISPLAY_WIDTH
+#define DISPLAY_WIDTH 720
+#endif
+#ifndef DISPLAY_HEIGHT
+#define DISPLAY_HEIGHT 1280
+#endif
+
 #ifndef PI
 #define PI 3.1415926535897932384626433832795
 #endif
@@ -286,7 +294,7 @@ void Avatar::setRotation(float degree) {
 }
 
 
-float Avatar::getRotation() const { return this->rotation; }
+
 
 void Avatar::setScale(float scale) { this->scale = scale; }
 

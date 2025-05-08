@@ -189,13 +189,7 @@ void Face::draw(DrawContext *ctx) {
   float breath = _min(1.0f, ctx->getBreath());
 
   // Defensive: check center coordinates for pushRotateZoom
-  int cx = w >> 1;
-  int cy = h >> 1;
-  if (cx <= 0 || cy <= 0) {
-    Serial.printf("Error: Center coordinates are invalid: cx=%d, cy=%d\n", cx, cy);
-    sprite->deleteSprite();
-    return;
-  }
+  
 
   // TODO(meganetaaan): unify drawing process of each parts
   BoundingRect rect = *mouthPos_;
@@ -227,7 +221,7 @@ void Face::draw(DrawContext *ctx) {
 
   // TODO(meganetaaan): rethink responsibility for transform function
   float scale = ctx->getScale();
-  float rotation = boundingRect ? boundingRect->getRotation() : 0.0f;
+  float rotation = boundingRect_ ? boundingRect_->getRotation() : 0.0f;
 
 // ▼▼▼▼ここから▼▼▼▼
   static constexpr uint8_t y_step = 8;
