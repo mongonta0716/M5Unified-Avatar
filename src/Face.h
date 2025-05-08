@@ -36,14 +36,14 @@ class Face {
 
  public:
   // constructor
-  Face();
+  Face(M5GFX* display = &M5.Display);
   Face(Drawable *mouth, Drawable *eyeR, Drawable *eyeL, Drawable *eyeblowR,
-       Drawable *eyeblowL);
+       Drawable *eyeblowL, M5GFX* display);
   // TODO(meganetaaan): apply builder pattern
   Face(Drawable *mouth, BoundingRect *mouthPos, Drawable *eyeR,
        BoundingRect *eyeRPos, Drawable *eyeL, BoundingRect *eyeLPos,
        Drawable *eyeblowR, BoundingRect *eyeblowRPos, Drawable *eyeblowL,
-       BoundingRect *eyeblowLPos);
+       BoundingRect *eyeblowLPos, M5GFX* display);
   Face(Drawable *mouth, BoundingRect *mouthPos, Drawable *eyeR,
        BoundingRect *eyeRPos, Drawable *eyeL, BoundingRect *eyeLPos,
        Drawable *eyeblowR, BoundingRect *eyeblowRPos, Drawable *eyeblowL,

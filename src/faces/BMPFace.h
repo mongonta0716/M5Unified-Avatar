@@ -45,13 +45,13 @@ class BMPEye : public Drawable
 class BMPFace : public Face
 {
 public:
-  BMPFace()
+  BMPFace(M5GFX* display = &M5.Display)
       : Face(new Mouth(50, 90, 4, 60), new BoundingRect(148, 163),
              new BMPEye(),
              new BoundingRect(103, 80), new BMPEye(),
              new BoundingRect(106, 240), new Eyeblow(15, 2, false),
              new BoundingRect(67, 96), new Eyeblow(15, 2, true),
-             new BoundingRect(72, 230)) {}
+             new BoundingRect(72, 230), display) {}
 };
 
 } // namespace m5avatar

@@ -95,9 +95,13 @@ TaskResult_t facialLoop(void *args) {
   TaskResult();
 }
 
-Avatar::Avatar() : Avatar(new Face()) {}
+Avatar::Avatar() : Avatar(&M5.Display) {}
 
-Avatar::Avatar(Face *face)
+Avatar::Avatar(M5GFX* display) : Avatar(new Face(new Mouth(50, 90, 4, 60), new Eye(8, false), new Eye(8, true), new Eyeblow(32, 0, false), new Eyeblow(32, 0, true), display), display) {}
+
+Avatar::Avatar(Face *face) : Avatar(face, &M5.Display) {}
+
+Avatar::Avatar(Face *face, M5GFX* display)
     : face{face},
       _isDrawing{false},
       expression{Expression::Neutral},
@@ -115,7 +119,9 @@ Avatar::Avatar(Face *face)
       palette{ColorPalette()},
       speechText{""},
       colorDepth{1},
-      batteryIconStatus{BatteryIconStatus::invisible} {}
+      batteryIconStatus{BatteryIconStatus::invisible},
+      batteryLevel{0},
+      speechFont{nullptr} {}
 
 Avatar::~Avatar() { delete face; }
 

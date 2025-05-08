@@ -11,27 +11,27 @@
 namespace m5avatar {
 BoundingRect br;
 
-Face::Face()
+Face::Face(M5GFX* display)
     : Face(new Mouth(50, 90, 4, 60), new BoundingRect(148, 163),
            new Eye(8, false), new BoundingRect(93, 90), new Eye(8, true),
            new BoundingRect(96, 230), new Eyeblow(32, 0, false),
            new BoundingRect(67, 96), new Eyeblow(32, 0, true),
-           new BoundingRect(72, 230)) {}
+           new BoundingRect(72, 230), display) {}
 
 Face::Face(Drawable *mouth, Drawable *eyeR, Drawable *eyeL, Drawable *eyeblowR,
-           Drawable *eyeblowL)
+           Drawable *eyeblowL, M5GFX* display)
     : Face(mouth, new BoundingRect(148, 163), eyeR, new BoundingRect(93, 90),
            eyeL, new BoundingRect(96, 230), eyeblowR, new BoundingRect(67, 96),
-           eyeblowL, new BoundingRect(72, 230)) {}
+           eyeblowL, new BoundingRect(72, 230), display) {}
 
 Face::Face(Drawable *mouth, BoundingRect *mouthPos, Drawable *eyeR,
            BoundingRect *eyeRPos, Drawable *eyeL, BoundingRect *eyeLPos,
            Drawable *eyeblowR, BoundingRect *eyeblowRPos, Drawable *eyeblowL,
-           BoundingRect *eyeblowLPos)
+           BoundingRect *eyeblowLPos, M5GFX* display)
     : Face(mouth, mouthPos, eyeR, eyeRPos, eyeL, eyeLPos, eyeblowR,
            eyeblowRPos, eyeblowL, eyeblowLPos,
            new BoundingRect(0, 0, 320, 240),
-           new M5Canvas(&M5.Lcd), new M5Canvas(&M5.Lcd)) {}
+           new M5Canvas(display), new M5Canvas(display)) {}
 
 Face::Face(Drawable *mouth, BoundingRect *mouthPos, Drawable *eyeR,
        BoundingRect *eyeRPos, Drawable *eyeL, BoundingRect *eyeLPos,
@@ -132,10 +132,13 @@ void Face::draw(DrawContext *ctx) {
 // ▼▼▼▼ここから▼▼▼▼
   static constexpr uint8_t y_step = 8;
 
+  // Get the display from the sprite
+  M5GFX* display = (M5GFX*)sprite->getParent();
+
   if (tmpSprite->getBuffer() == nullptr) {
     // 出力先と同じcolorDepthを指定することで、DMA転送が可能になる。
     // Display自体は16bit or 24bitしか指定できないが、細長なので1bitではなくても大丈夫。
-    tmpSprite->setColorDepth(M5.Display.getColorDepth());
+    tmpSprite->setColorDepth(display->getColorDepth());
 
     // 確保するメモリは高さ8ピクセルの横長の細長い短冊状とする。
     tmpSprite->createSprite(boundingRect->getWidth(), y_step);
@@ -152,16 +155,16 @@ void Face::draw(DrawContext *ctx) {
     sprite->pushRotateZoom(tmpSprite, boundingRect->getWidth()>>1, (boundingRect->getHeight()>>1) - y, rotation, scale, scale);
 
     // tmpSpriteから画面に転写
-    M5.Display.startWrite();
+    display->startWrite();
 
     // 事前にstartWriteしておくことで、pushSprite はDMA転送を開始するとすぐに処理を終えて戻ってくる。
-    tmpSprite->pushSprite(&M5.Display, boundingRect->getLeft(), boundingRect->getTop() + y);
+    tmpSprite->pushSprite(display, boundingRect->getLeft(), boundingRect->getTop() + y);
 
     // DMA転送中にdelay処理を設けることにより、DMA転送中に他のタスクへCPU処理時間を譲ることができる。
     lgfx::delay(1);
 
     // endWriteによってDMA転送の終了を待つ。
-    M5.Display.endWrite();
+    display->endWrite();
 
   } while ((y += y_step) < boundingRect->getHeight());
 
