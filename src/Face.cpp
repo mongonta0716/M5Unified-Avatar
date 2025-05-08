@@ -155,7 +155,7 @@ void Face::draw(DrawContext *ctx) {
 
   // TODO(meganetaaan): rethink responsibility for transform function
   float scale = ctx->getScale();
-  float rotation = ctx->getRotation();
+  float rotation = boundingRect ? boundingRect->getRotation() : 0.0f;
 
 // ▼▼▼▼ここから▼▼▼▼
   static constexpr uint8_t y_step = 8;
@@ -181,7 +181,8 @@ void Face::draw(DrawContext *ctx) {
     tmpSprite->clear();
 
     // 傾きとズームを反映してspriteからtmpSpriteに転写
-    sprite->pushRotateZoom(tmpSprite, boundingRect->getWidth()>>1, (boundingRect->getHeight()>>1) - y, rotation, scale, scale);
+    float avatarRotation = ctx ? ctx->getRotation() : 0.0f;
+    sprite->pushRotateZoom(tmpSprite, boundingRect->getWidth()>>1, (boundingRect->getHeight()>>1) - y, avatarRotation, scale, scale);
 
     // tmpSpriteから画面に転写
     display->startWrite();

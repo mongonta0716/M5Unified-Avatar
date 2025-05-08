@@ -203,14 +203,17 @@ Avatar::Avatar(Face *face, M5GFX* display)
       rightGazeV_{1.0f},
       isAutoBlink_{true},
       mouthOpenRatio{0},
-      rotation{0},
+      rotation{0.0f},
       scale{1},
       palette{ColorPalette()},
       speechText{""},
       colorDepth{1},
       batteryIconStatus{BatteryIconStatus::invisible},
       batteryLevel{0},
-      speechFont{nullptr} {}
+      speechFont{nullptr} {
+  // 念のため明示的に初期化
+  rotation = 0.0f;
+}
 
 Avatar::~Avatar() { delete face; }
 
@@ -318,7 +321,18 @@ void Avatar::setBreath(float breath) { this->breath = breath; }
 
 float Avatar::getBreath() { return this->breath; }
 
-void Avatar::setRotation(float radian) { this->rotation = radian; }
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+void Avatar::setRotation(float degree) {
+  this->rotation = degree; // * (M_PI / 180.0f);
+  if (this->getFace() && this->getFace()->getBoundingRect()) {
+    this->getFace()->getBoundingRect()->setRotation(this->rotation);
+  }
+}
+
+
+float Avatar::getRotation() const { return this->rotation; }
 
 void Avatar::setScale(float scale) { this->scale = scale; }
 

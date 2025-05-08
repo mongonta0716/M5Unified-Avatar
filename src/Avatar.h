@@ -64,6 +64,8 @@ class Avatar {
   Avatar(int boundingRectWidth = 320, int boundingRectHeight = 240); // Default constructor using M5.Display
   Avatar();
   Avatar(M5GFX* display);
+  // Set rotation in degrees (internally converted to radians)
+  float getRotation() const;
   explicit Avatar(Face *face, M5GFX* display);
   explicit Avatar(Face *face); // Default constructor using M5.Display
   ~Avatar();
@@ -111,7 +113,8 @@ class Avatar {
   void setMouthOpenRatio(float ratio);
   void setSpeechText(const char *speechText);
   void setSpeechFont(const lgfx::IFont *speechFont);
-  void setRotation(float radian);
+  // Set rotation in degrees (internally converted to radians)
+  void setRotation(float degree);
   void setPosition(int top, int left);
   void setScale(float scale);
   void draw(void);
