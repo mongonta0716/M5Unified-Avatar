@@ -60,8 +60,10 @@ class Avatar {
   const lgfx::IFont *speechFont;
 
  public:
+  Avatar(M5GFX* display, int boundingRectWidth = 320, int boundingRectHeight = 240);
+  Avatar(int boundingRectWidth = 320, int boundingRectHeight = 240); // Default constructor using M5.Display
+  Avatar();
   Avatar(M5GFX* display);
-  Avatar(); // Default constructor using M5.Display
   explicit Avatar(Face *face, M5GFX* display);
   explicit Avatar(Face *face); // Default constructor using M5.Display
   ~Avatar();

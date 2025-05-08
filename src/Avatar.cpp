@@ -95,9 +95,98 @@ TaskResult_t facialLoop(void *args) {
   TaskResult();
 }
 
-Avatar::Avatar() : Avatar(&M5.Display) {}
+Avatar::Avatar(int boundingRectWidth, int boundingRectHeight)
+    : Avatar(&M5.Display, boundingRectWidth, boundingRectHeight) {}
 
-Avatar::Avatar(M5GFX* display) : Avatar(new Face(new Mouth(50, 90, 4, 60), new Eye(8, false), new Eye(8, true), new Eyeblow(32, 0, false), new Eyeblow(32, 0, true), display), display) {}
+Avatar::Avatar(M5GFX* display, int boundingRectWidth, int boundingRectHeight)
+    : Avatar(new Face(
+        // --- サイズスケーリング ---
+        [=]() {
+          const int BASE_WIDTH = 320, BASE_HEIGHT = 240;
+          float scaleX = boundingRectWidth / float(BASE_WIDTH);
+          float scaleY = boundingRectHeight / float(BASE_HEIGHT);
+          uint16_t mouthMinWidth  = uint16_t(50 * scaleX);
+          uint16_t mouthMaxWidth  = uint16_t(90 * scaleX);
+          uint16_t mouthMinHeight = uint16_t(4 * scaleY);
+          uint16_t mouthMaxHeight = uint16_t(60 * scaleY);
+          return new Mouth(mouthMinWidth, mouthMaxWidth, mouthMinHeight, mouthMaxHeight);
+        }(),
+        // --- 位置スケーリング ---
+        [=]() {
+          const int BASE_WIDTH = 320, BASE_HEIGHT = 240;
+          float scaleX = boundingRectWidth / float(BASE_WIDTH);
+          float scaleY = boundingRectHeight / float(BASE_HEIGHT);
+          int mouthTop = int(148 * scaleY);
+          int mouthLeft = int(163 * scaleX);
+          return new BoundingRect(mouthTop, mouthLeft);
+        }(),
+        [=]() {
+          const int BASE_WIDTH = 320, BASE_HEIGHT = 240;
+          float scaleX = boundingRectWidth / float(BASE_WIDTH);
+          uint16_t eyeRadius = uint16_t(8 * scaleX);
+          return new Eye(eyeRadius, false);
+        }(),
+        [=]() {
+          const int BASE_WIDTH = 320, BASE_HEIGHT = 240;
+          float scaleX = boundingRectWidth / float(BASE_WIDTH);
+          float scaleY = boundingRectHeight / float(BASE_HEIGHT);
+          int eyeRTop = int(93 * scaleY);
+          int eyeRLeft = int(90 * scaleX);
+          return new BoundingRect(eyeRTop, eyeRLeft);
+        }(),
+        [=]() {
+          const int BASE_WIDTH = 320, BASE_HEIGHT = 240;
+          float scaleX = boundingRectWidth / float(BASE_WIDTH);
+          uint16_t eyeRadius = uint16_t(8 * scaleX);
+          return new Eye(eyeRadius, true);
+        }(),
+        [=]() {
+          const int BASE_WIDTH = 320, BASE_HEIGHT = 240;
+          float scaleX = boundingRectWidth / float(BASE_WIDTH);
+          float scaleY = boundingRectHeight / float(BASE_HEIGHT);
+          int eyeLTop = int(96 * scaleY);
+          int eyeLLeft = int(230 * scaleX);
+          return new BoundingRect(eyeLTop, eyeLLeft);
+        }(),
+        [=]() {
+          const int BASE_WIDTH = 320, BASE_HEIGHT = 240;
+          float scaleX = boundingRectWidth / float(BASE_WIDTH);
+          float scaleY = boundingRectHeight / float(BASE_HEIGHT);
+          uint16_t eyeblowWidth  = uint16_t(32 * scaleX);
+          uint16_t eyeblowHeight = uint16_t(4 * scaleY);
+          return new Eyeblow(eyeblowWidth, eyeblowHeight, false);
+        }(),
+        [=]() {
+          const int BASE_WIDTH = 320, BASE_HEIGHT = 240;
+          float scaleX = boundingRectWidth / float(BASE_WIDTH);
+          float scaleY = boundingRectHeight / float(BASE_HEIGHT);
+          int eyeblowRTop = int(67 * scaleY);
+          int eyeblowRLeft = int(96 * scaleX);
+          return new BoundingRect(eyeblowRTop, eyeblowRLeft);
+        }(),
+        [=]() {
+          const int BASE_WIDTH = 320, BASE_HEIGHT = 240;
+          float scaleX = boundingRectWidth / float(BASE_WIDTH);
+          float scaleY = boundingRectHeight / float(BASE_HEIGHT);
+          uint16_t eyeblowWidth  = uint16_t(32 * scaleX);
+          uint16_t eyeblowHeight = uint16_t(4 * scaleY);
+          return new Eyeblow(eyeblowWidth, eyeblowHeight, true);
+        }(),
+        [=]() {
+          const int BASE_WIDTH = 320, BASE_HEIGHT = 240;
+          float scaleX = boundingRectWidth / float(BASE_WIDTH);
+          float scaleY = boundingRectHeight / float(BASE_HEIGHT);
+          int eyeblowLTop = int(72 * scaleY);
+          int eyeblowLLeft = int(230 * scaleX);
+          return new BoundingRect(eyeblowLTop, eyeblowLLeft);
+        }(),
+        new BoundingRect(0, 0, boundingRectWidth, boundingRectHeight),
+        new M5Canvas(display), new M5Canvas(display)
+      ), display) {}
+
+Avatar::Avatar() : Avatar(&M5.Display, 320, 240) {}
+
+Avatar::Avatar(M5GFX* display) : Avatar(display, 320, 240) {}
 
 Avatar::Avatar(Face *face) : Avatar(face, &M5.Display) {}
 
@@ -186,7 +275,7 @@ void Avatar::start(int colorDepth) {
   // TODO(meganetaaan): keep handle of these tasks
   xTaskCreateUniversal(drawLoop,        /* Function to implement the task */
                        "drawLoop",      /* Name of the task */
-                       2048,            /* Stack size in words */
+                       8192,            /* Stack size in words */
                        ctx,             /* Task input parameter */
                        1,               /* Priority of the task */
                        &drawTaskHandle, /* Task handle. */

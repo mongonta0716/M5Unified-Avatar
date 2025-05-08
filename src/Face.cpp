@@ -38,19 +38,22 @@ Face::Face(Drawable *mouth, BoundingRect *mouthPos, Drawable *eyeR,
        Drawable *eyeblowR, BoundingRect *eyeblowRPos, Drawable *eyeblowL,
        BoundingRect *eyeblowLPos,
        BoundingRect *boundingRect, M5Canvas *spr, M5Canvas *tmpSpr)
-    : mouth{mouth},
-      eyeR{eyeR},
-      eyeL{eyeL},
-      eyeblowR{eyeblowR},
-      eyeblowL{eyeblowL},
-      mouthPos{mouthPos},
-      eyeRPos{eyeRPos},
-      eyeLPos{eyeLPos},
-      eyeblowRPos{eyeblowRPos},
-      eyeblowLPos{eyeblowLPos},
-      boundingRect{boundingRect},
-      sprite{spr},
-      tmpSprite{tmpSpr} {}
+    : mouth(mouth),
+      eyeR(eyeR),
+      eyeL(eyeL),
+      eyeblowR(eyeblowR),
+      eyeblowL(eyeblowL),
+      mouthPos(mouthPos),
+      eyeRPos(eyeRPos),
+      eyeLPos(eyeLPos),
+      eyeblowRPos(eyeblowRPos),
+      eyeblowLPos(eyeblowLPos),
+      boundingRect(boundingRect),
+      sprite(spr),
+      tmpSprite(tmpSpr),
+      b(new Balloon()),
+      h(new Effect()),
+      battery(new BatteryIcon()) {}
 
 Face::~Face() {
   delete mouth;
@@ -85,7 +88,24 @@ Drawable *Face::getRightEye() { return eyeR; }
 BoundingRect *Face::getBoundingRect() { return boundingRect; }
 
 void Face::draw(DrawContext *ctx) {
-  sprite->createSprite(boundingRect->getWidth(), boundingRect->getHeight());
+  // Defensive: check all pointers before use
+  if (!sprite || !tmpSprite || !boundingRect) {
+    Serial.println("Error: Null pointer in Face::draw");
+    return;
+  }
+  int w = boundingRect->getWidth();
+  int h = boundingRect->getHeight();
+  if (w <= 0 || h <= 0) {
+    Serial.printf("Error: Sprite size is zero or negative. w=%d, h=%d\n", w, h);
+    return;
+  }
+  sprite->setPsram(true);
+  sprite->createSprite(w, h);
+  if (!sprite->getBuffer()) {
+    Serial.println("Error: Sprite buffer allocation failed.");
+    return;
+  }
+  // Already checked w and h above
   sprite->setColorDepth(ctx->getColorDepth());
   // NOTE: setting below for 1-bit color depth
   sprite->setBitmapColor(ctx->getColorPalette()->get(COLOR_PRIMARY),
@@ -96,6 +116,15 @@ void Face::draw(DrawContext *ctx) {
     sprite->fillSprite(0);
   }
   float breath = _min(1.0f, ctx->getBreath());
+
+  // Defensive: check center coordinates for pushRotateZoom
+  int cx = w >> 1;
+  int cy = h >> 1;
+  if (cx <= 0 || cy <= 0) {
+    Serial.printf("Error: Center coordinates are invalid: cx=%d, cy=%d\n", cx, cy);
+    sprite->deleteSprite();
+    return;
+  }
 
   // TODO(meganetaaan): unify drawing process of each parts
   BoundingRect rect = *mouthPos;
@@ -121,7 +150,6 @@ void Face::draw(DrawContext *ctx) {
 
   // TODO(meganetaaan): make balloons and effects selectable
   b->draw(sprite, br, ctx);
-  h->draw(sprite, br, ctx);
   battery->draw(sprite, br, ctx);
   // drawAccessory(sprite, position, ctx);
 
@@ -136,6 +164,7 @@ void Face::draw(DrawContext *ctx) {
   M5GFX* display = (M5GFX*)sprite->getParent();
 
   if (tmpSprite->getBuffer() == nullptr) {
+    tmpSprite->setPsram(true);
     // 出力先と同じcolorDepthを指定することで、DMA転送が可能になる。
     // Display自体は16bit or 24bitしか指定できないが、細長なので1bitではなくても大丈夫。
     tmpSprite->setColorDepth(display->getColorDepth());
