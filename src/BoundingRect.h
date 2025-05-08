@@ -9,6 +9,9 @@
 namespace m5avatar {
 class BoundingRect {
  private:
+  float rotation_ = 0.0f; // 回転角（ラジアン）
+
+ private:
   int16_t top;
   int16_t left;
   int16_t width;
@@ -16,6 +19,9 @@ class BoundingRect {
 
  public:
   BoundingRect() = default;
+  void setRotation(float rad) { rotation_ = rad; }
+  float getRotation() const { return rotation_; }
+
   ~BoundingRect() = default;
   BoundingRect(int16_t top, int16_t left);
   BoundingRect(int16_t top, int16_t left, int16_t width, int16_t height);
