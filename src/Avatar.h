@@ -67,7 +67,8 @@ class Avatar {
   // Set rotation in degrees (internally converted to radians)
   float getRotation() const;
   explicit Avatar(Face *face, M5GFX* display);
-  explicit Avatar(Face *face); // Default constructor using M5.Display
+  explicit Avatar(Face *face);
+  Avatar(Face *face, M5GFX* display, int boundingRectWidth, int boundingRectHeight);
   ~Avatar();
   Avatar(const Avatar &other) = default;
   Avatar &operator=(const Avatar &other) = default;

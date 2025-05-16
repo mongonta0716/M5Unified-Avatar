@@ -11,10 +11,10 @@ DrawContext::DrawContext(Expression expression, float breath,
                          float rightEyeOpenRatio, Gaze leftGaze,
                          float leftEyeOpenRatio, float mouthOpenRatio,
                          String speechText, BatteryIconStatus batteryIconStatus,
-                         int32_t batteryLevel, const lgfx::IFont* speechFont)
+                         int32_t batteryLevel, const lgfx::IFont* speechFont, M5GFX* display)
     : DrawContext(expression, breath, palette, rightGaze, rightEyeOpenRatio,
                   leftGaze, leftEyeOpenRatio, mouthOpenRatio, speechText, 0, 1,
-                  1, BatteryIconStatus::invisible, 0, speechFont){};
+                  1, BatteryIconStatus::invisible, 0, speechFont, display){};
 
 DrawContext::DrawContext(Expression expression, float breath,
                          ColorPalette* const palette, Gaze rightGaze,
@@ -22,7 +22,7 @@ DrawContext::DrawContext(Expression expression, float breath,
                          float leftEyeOpenRatio, float mouthOpenRatio,
                          String speechText, float rotation, float scale,
                          int colorDepth, BatteryIconStatus batteryIconStatus,
-                         int32_t batteryLevel, const lgfx::IFont* speechFont)
+                         int32_t batteryLevel, const lgfx::IFont* speechFont, M5GFX* display)
     : expression{expression},
       breath{breath},
       rightGaze{rightGaze},
@@ -37,7 +37,8 @@ DrawContext::DrawContext(Expression expression, float breath,
       colorDepth{colorDepth},
       batteryIconStatus(batteryIconStatus),
       batteryLevel(batteryLevel),
-      speechFont{speechFont} {}
+      speechFont{speechFont},
+      display{display} {}
 
 Expression DrawContext::getExpression() const { return expression; }
 

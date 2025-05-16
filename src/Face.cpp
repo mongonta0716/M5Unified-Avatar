@@ -31,13 +31,13 @@ Face::Face(Drawable *mouth, BoundingRect *mouthPos, Drawable *eyeR,
     : Face(mouth, mouthPos, eyeR, eyeRPos, eyeL, eyeLPos, eyeblowR,
            eyeblowRPos, eyeblowL, eyeblowLPos,
            new BoundingRect(0, 0, 320, 240),
-           new M5Canvas(display), new M5Canvas(display)) {}
+           new M5Canvas(display), new M5Canvas(display), display) {}
 
 Face::Face(Drawable *mouth, BoundingRect *mouthPos, Drawable *eyeR,
        BoundingRect *eyeRPos, Drawable *eyeL, BoundingRect *eyeLPos,
        Drawable *eyeblowR, BoundingRect *eyeblowRPos, Drawable *eyeblowL,
        BoundingRect *eyeblowLPos,
-       BoundingRect *boundingRect, M5Canvas *spr, M5Canvas *tmpSpr)
+       BoundingRect *boundingRect, M5Canvas *spr, M5Canvas *tmpSpr, M5GFX* display)
     : mouth(mouth),
       eyeR(eyeR),
       eyeL(eyeL),
@@ -53,7 +53,8 @@ Face::Face(Drawable *mouth, BoundingRect *mouthPos, Drawable *eyeR,
       tmpSprite(tmpSpr),
       b(new Balloon()),
       h(new Effect()),
-      battery(new BatteryIcon()) {}
+      battery(new BatteryIcon()),
+      display(display) {}
 
 Face::~Face() {
   delete mouth;
@@ -89,8 +90,8 @@ BoundingRect *Face::getBoundingRect() { return boundingRect; }
 
 void Face::draw(DrawContext *ctx) {
   // Defensive: check all pointers before use
-  if (!sprite || !tmpSprite || !boundingRect) {
-    Serial.println("Error: Null pointer in Face::draw");
+  if (!sprite || !tmpSprite || !boundingRect || !display) {
+    Serial.println("Error: Null pointer in Face::draw (sprite/tmpSprite/boundingRect/display)");
     return;
   }
   int w = boundingRect->getWidth();
@@ -161,7 +162,7 @@ void Face::draw(DrawContext *ctx) {
   static constexpr uint8_t y_step = 8;
 
   // Get the display from the sprite
-  M5GFX* display = (M5GFX*)sprite->getParent();
+  //M5GFX* display = (M5GFX*)sprite->getParent();
 
   if (tmpSprite->getBuffer() == nullptr) {
     tmpSprite->setPsram(true);

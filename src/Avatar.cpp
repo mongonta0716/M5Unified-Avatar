@@ -10,6 +10,32 @@
 
 namespace m5avatar {
 
+Avatar::Avatar(Face *face, M5GFX* display, int boundingRectWidth, int boundingRectHeight)
+    : face(face),
+      _isDrawing(false),
+      expression(Expression::Neutral),
+      breath(0.0f),
+      rightEyeOpenRatio_(1.0f),
+      rightGazeV_(0.0f),
+      rightGazeH_(0.0f),
+      leftEyeOpenRatio_(1.0f),
+      leftGazeV_(0.0f),
+      leftGazeH_(0.0f),
+      isAutoBlink_(true),
+      mouthOpenRatio(0.0f),
+      rotation(0.0f),
+      scale(1.0f),
+      palette(),
+      speechText(""),
+      colorDepth(1),
+      batteryIconStatus(BatteryIconStatus::invisible),
+      batteryLevel(0),
+      speechFont(nullptr)
+{
+  // display, boundingRectWidth, boundingRectHeightはface生成時に使われているのでここでは特に処理不要
+}
+
+
 unsigned int seed = 0;
 
 #ifndef rand_r
@@ -181,8 +207,10 @@ Avatar::Avatar(M5GFX* display, int boundingRectWidth, int boundingRectHeight)
           return new BoundingRect(eyeblowLTop, eyeblowLLeft);
         }(),
         new BoundingRect(0, 0, boundingRectWidth, boundingRectHeight),
-        new M5Canvas(display), new M5Canvas(display)
-      ), display) {}
+        new M5Canvas(display),
+        new M5Canvas(display),
+        display),
+      display, boundingRectWidth, boundingRectHeight) {}
 
 Avatar::Avatar() : Avatar(&M5.Display, 320, 240) {}
 
@@ -217,7 +245,12 @@ Avatar::Avatar(Face *face, M5GFX* display)
 
 Avatar::~Avatar() { delete face; }
 
-void Avatar::setFace(Face *face) { this->face = face; }
+void Avatar::setFace(Face *newFace) {
+  if (face != newFace) {
+    delete face; // 古いfaceを解放
+    face = newFace;
+  }
+}
 
 Face *Avatar::getFace() const { return face; }
 
@@ -302,7 +335,7 @@ void Avatar::draw() {
       this->rightEyeOpenRatio_, leftGaze, this->leftEyeOpenRatio_,
       this->mouthOpenRatio, this->speechText, this->rotation, this->scale,
       this->colorDepth, this->batteryIconStatus, this->batteryLevel,
-      this->speechFont);
+      this->speechFont, this->face ? this->face->getDisplay() : nullptr);
   face->draw(ctx);
   delete ctx;
 }
@@ -325,10 +358,12 @@ float Avatar::getBreath() { return this->breath; }
 #define M_PI 3.14159265358979323846
 #endif
 void Avatar::setRotation(float degree) {
-  this->rotation = degree; // * (M_PI / 180.0f);
-  if (this->getFace() && this->getFace()->getBoundingRect()) {
-    this->getFace()->getBoundingRect()->setRotation(this->rotation);
-  }
+  this->rotation = degree;
+  Face* f = this->getFace();
+  if (!f) return;
+  BoundingRect* rect = f->getBoundingRect();
+  if (!rect) return;
+  rect->setRotation(this->rotation);
 }
 
 

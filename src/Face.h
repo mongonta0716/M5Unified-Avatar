@@ -28,6 +28,7 @@ class Face {
   BoundingRect *eyeblowRPos;
   BoundingRect *eyeblowLPos;
   BoundingRect *boundingRect;
+  M5GFX* display;
   M5Canvas *sprite;
   M5Canvas *tmpSprite;
   Balloon *b;
@@ -48,7 +49,7 @@ class Face {
        BoundingRect *eyeRPos, Drawable *eyeL, BoundingRect *eyeLPos,
        Drawable *eyeblowR, BoundingRect *eyeblowRPos, Drawable *eyeblowL,
        BoundingRect *eyeblowLPos,
-       BoundingRect *boundingRect, M5Canvas *spr, M5Canvas *tmpSpr);
+       BoundingRect *boundingRect, M5Canvas *spr, M5Canvas *tmpSpr, M5GFX* display);
   ~Face();
   Face(const Face &other) = default;
   Face &operator=(const Face &other) = default;
@@ -69,6 +70,7 @@ class Face {
   void setRightEyeblow();
 
   void draw(DrawContext *ctx);
+  M5GFX* getDisplay() const { return display; }
 };
 }  // namespace m5avatar
 
